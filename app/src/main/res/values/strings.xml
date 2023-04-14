@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="title_remote">Remote</string>
+    <string name="title_map">Map</string>
+    <string name="title_image">Image</string>
 </resources>
