@@ -1,5 +1,8 @@
 package com.example.myapplication.ui.remote
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,11 +11,28 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.myapplication.MainActivity
 import com.example.myapplication.databinding.FragmentRemoteBinding
+import java.io.IOException
+import java.io.OutputStream
+import java.util.*
+import android.Manifest
+import android.content.ContentValues.TAG
+import android.content.pm.PackageManager
+import android.util.Log
+import androidx.core.content.ContextCompat
 
 class RemoteFragment : Fragment() {
 
     private var _binding: FragmentRemoteBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private var bluetoothSocket: BluetoothSocket? = null
+
+    companion object {
+        private const val BLUETOOTH_PERMISSION_REQUEST_CODE = 1
+    }
+
+    private val bluetoothDeviceAddress = "E4:5F:01:92:B0:3F"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,15 +69,81 @@ class RemoteFragment : Fragment() {
             }
         }
 
-        binding.forward.setOnClickListener { print("forward") }
-        binding.backward.setOnClickListener { print("backward") }
-        binding.left.setOnClickListener { print("left") }
-        binding.right.setOnClickListener { print("right") }
+        binding.forward.setOnClickListener {
+            sendBluetoothCommand("F")
+        }
+
+        binding.backward.setOnClickListener {
+            sendBluetoothCommand("B")
+        }
+
+        binding.left.setOnClickListener {
+            sendBluetoothCommand("L")
+        }
+
+        binding.right.setOnClickListener {
+            sendBluetoothCommand("R")
+        }
+
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.BLUETOOTH
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            connectToDevice()
+        } else {
+            requestPermissions(
+                arrayOf(Manifest.permission.BLUETOOTH),
+                BLUETOOTH_PERMISSION_REQUEST_CODE
+            )
+        }
         return root
+    }
+
+    private fun connectToDevice() {
+        try {
+            val device: BluetoothDevice? = bluetoothAdapter.getRemoteDevice(bluetoothDeviceAddress)
+            bluetoothSocket = device?.createRfcommSocketToServiceRecord(UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ab"))
+            bluetoothSocket?.connect()
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == BLUETOOTH_PERMISSION_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            connectToDevice()
+        }
+    }
+
+    private fun sendBluetoothCommand(command: String) {
+        val outputStream: OutputStream? = bluetoothSocket?.outputStream
+        val bytes = command.toByteArray()
+        try {
+            outputStream?.write(bytes)
+            println("Command sent successfully: $command")
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        try {
+            bluetoothSocket?.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
+
 }
