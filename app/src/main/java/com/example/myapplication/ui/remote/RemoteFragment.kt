@@ -18,6 +18,7 @@ import android.Manifest
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.util.Log
+import android.view.MotionEvent
 import androidx.core.content.ContextCompat
 
 class RemoteFragment : Fragment() {
@@ -73,20 +74,52 @@ class RemoteFragment : Fragment() {
             }
         }
 
-        binding.forward.setOnClickListener {
-            sendBluetoothCommand("D:W")
+        binding.forward.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    sendBluetoothCommand("D:W")
+                }
+                MotionEvent.ACTION_UP -> {
+                    sendBluetoothCommand("S:W")
+                }
+            }
+            true
         }
 
-        binding.backward.setOnClickListener {
-            sendBluetoothCommand("D:S")
+        binding.backward.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    sendBluetoothCommand("D:S")
+                }
+                MotionEvent.ACTION_UP -> {
+                    sendBluetoothCommand("S:S")
+                }
+            }
+            true
         }
 
-        binding.left.setOnClickListener {
-            sendBluetoothCommand("D:A")
+        binding.left.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    sendBluetoothCommand("D:A")
+                }
+                MotionEvent.ACTION_UP -> {
+                    sendBluetoothCommand("S:A")
+                }
+            }
+            true
         }
 
-        binding.right.setOnClickListener {
-            sendBluetoothCommand("D:D")
+        binding.right.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    sendBluetoothCommand("D:D")
+                }
+                MotionEvent.ACTION_UP -> {
+                    sendBluetoothCommand("S:D")
+                }
+            }
+            true
         }
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
