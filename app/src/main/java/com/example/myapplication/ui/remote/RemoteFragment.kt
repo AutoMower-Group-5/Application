@@ -57,11 +57,15 @@ class RemoteFragment : Fragment() {
         binding.toggleMode.setOnClickListener {
             remoteViewModel.automaticMode = !remoteViewModel.automaticMode
             if (remoteViewModel.automaticMode) {
+                val automaticModeCommand = "M:A"
+                bluetoothSocket?.outputStream?.write(automaticModeCommand.toByteArray())
                 binding.forward.isEnabled = false
                 binding.backward.isEnabled = false
                 binding.left.isEnabled = false
                 binding.right.isEnabled = false
             } else {
+                val manualModeCommand = "M:M"
+                bluetoothSocket?.outputStream?.write(manualModeCommand.toByteArray())
                 binding.forward.isEnabled = true
                 binding.backward.isEnabled = true
                 binding.left.isEnabled = true
@@ -70,19 +74,19 @@ class RemoteFragment : Fragment() {
         }
 
         binding.forward.setOnClickListener {
-            sendBluetoothCommand("F")
+            sendBluetoothCommand("D:W")
         }
 
         binding.backward.setOnClickListener {
-            sendBluetoothCommand("B")
+            sendBluetoothCommand("D:S")
         }
 
         binding.left.setOnClickListener {
-            sendBluetoothCommand("L")
+            sendBluetoothCommand("D:A")
         }
 
         binding.right.setOnClickListener {
-            sendBluetoothCommand("R")
+            sendBluetoothCommand("D:D")
         }
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -125,16 +129,24 @@ class RemoteFragment : Fragment() {
     }
 
     private fun sendBluetoothCommand(command: String) {
-        val outputStream: OutputStream? = bluetoothSocket?.outputStream
-        val bytes = command.toByteArray()
         try {
-            outputStream?.write(bytes)
-            println("Command sent successfully: $command")
+            // Put the mower in manual mode
 
-        } catch (e: IOException) {
-            e.printStackTrace()
+            // Send the desired command
+            bluetoothSocket?.outputStream?.write(command.toByteArray())
+
+            // Put the mower back in automatic mode
+
+            // Flush the output stream
+            bluetoothSocket?.outputStream?.flush()
+
+            // Print a success message
+            Log.d(TAG, "Command sent successfully: $command")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error sending command: $command", e)
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
