@@ -30,14 +30,14 @@ class ImageFragment : Fragment() {
 
     private val executor: Executor = Executors.newSingleThreadExecutor()
     private val handler = Handler(Looper.getMainLooper())
-    private var listImage: Array<DataTest>? = null
+    private var listImage: Array<DataImage>? = null
     private var numberImage = 0
 
     @Serializable
-    data class DataBis(val URL: String)
+    data class DataImage(val Label: String, val URL: String)
 
     @Serializable
-    data class DataTest(val Label: String, val URL: DataBis)
+    data class DataPath(val y: Int, val x: Int)
 
     @SuppressLint("SetTextI18n")
     @OptIn(DelicateCoroutinesApi::class)
@@ -55,10 +55,10 @@ class ImageFragment : Fragment() {
         GlobalScope.async {
             val result = APIMower().getArrayImages()
             if (result != null) {
-                listImage = Json.decodeFromString<Array<DataTest>>(result.string())
+                listImage = Json.decodeFromString<Array<DataImage>>(result.string())
             }
             activity!!.runOnUiThread {
-                if (listImage!!.size - 1 > 1) {
+                if (listImage!!.size > 1) {
                     binding.nextImage.visibility = VISIBLE
                     downloadImageTest()
                 } else if (listImage!!.isEmpty()) {
@@ -100,7 +100,7 @@ class ImageFragment : Fragment() {
         var error = false
 
         executor.execute {
-            val imageURL = listImage?.get(numberImage)!!.URL.URL
+            val imageURL = listImage?.get(numberImage)!!.URL
 
             var image: Bitmap? = null
             try {
