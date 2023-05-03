@@ -36,9 +36,6 @@ class ImageFragment : Fragment() {
     @Serializable
     data class DataImage(val Label: String, val URL: String)
 
-    @Serializable
-    data class DataPath(val y: Int, val x: Int)
-
     @SuppressLint("SetTextI18n")
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreateView(

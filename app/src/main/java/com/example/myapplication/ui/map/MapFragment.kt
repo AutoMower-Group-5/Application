@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.myapplication.APIMower
 import com.example.myapplication.databinding.FragmentMapBinding
 
 class MapFragment : Fragment() {
@@ -19,13 +20,21 @@ class MapFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val mapViewModel =
-            ViewModelProvider(this)[MapViewModel::class.java]
-
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textMap
+        // Create an instance of the APIMower class
+        val apiMower = APIMower()
+
+        // Call the getArrayPath() function
+        val response = apiMower.getArrayPath()
+
+        // Convert the response to a string and display it in a text view
+        response?.let {
+            val pathData = it.string()
+            val textView: TextView = binding.textMap
+            textView.text = pathData
+        }
         return root
     }
 

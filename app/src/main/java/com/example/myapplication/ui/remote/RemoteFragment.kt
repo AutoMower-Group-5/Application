@@ -81,7 +81,7 @@ class RemoteFragment : Fragment() {
                     sendBluetoothCommand("D:W")
                 }
                 MotionEvent.ACTION_UP -> {
-                    sendBluetoothCommand("S:W")
+                    sendBluetoothCommand("D:Q")
                 }
             }
             true
@@ -93,7 +93,7 @@ class RemoteFragment : Fragment() {
                     sendBluetoothCommand("D:S")
                 }
                 MotionEvent.ACTION_UP -> {
-                    sendBluetoothCommand("S:S")
+                    sendBluetoothCommand("D:Q")
                 }
             }
             true
@@ -105,7 +105,7 @@ class RemoteFragment : Fragment() {
                     sendBluetoothCommand("D:A")
                 }
                 MotionEvent.ACTION_UP -> {
-                    sendBluetoothCommand("S:A")
+                    sendBluetoothCommand("D:Q")
                 }
             }
             true
@@ -117,7 +117,7 @@ class RemoteFragment : Fragment() {
                     sendBluetoothCommand("D:D")
                 }
                 MotionEvent.ACTION_UP -> {
-                    sendBluetoothCommand("S:D")
+                    sendBluetoothCommand("D:Q")
                 }
             }
             true
