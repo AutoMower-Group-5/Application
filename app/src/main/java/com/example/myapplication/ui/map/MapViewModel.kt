@@ -5,9 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class MapViewModel : ViewModel() {
-
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is map Fragment"
+    private val positionsLiveData = MutableLiveData<FloatArray>()
+    fun getPositionsLiveData(): LiveData<FloatArray> {
+        return positionsLiveData
     }
-    val text: LiveData<String> = _text
+
+    fun setPositionData(positionData: FloatArray) {
+        positionsLiveData.value = positionData
+    }
 }

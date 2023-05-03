@@ -58,19 +58,20 @@ class RemoteFragment : Fragment() {
         binding.toggleMode.setOnClickListener {
             remoteViewModel.automaticMode = !remoteViewModel.automaticMode
             if (remoteViewModel.automaticMode) {
-                val automaticModeCommand = "M:A"
-                bluetoothSocket?.outputStream?.write(automaticModeCommand.toByteArray())
-                binding.forward.isEnabled = false
-                binding.backward.isEnabled = false
-                binding.left.isEnabled = false
-                binding.right.isEnabled = false
-            } else {
+
                 val manualModeCommand = "M:M"
                 bluetoothSocket?.outputStream?.write(manualModeCommand.toByteArray())
                 binding.forward.isEnabled = true
                 binding.backward.isEnabled = true
                 binding.left.isEnabled = true
                 binding.right.isEnabled = true
+            } else {
+                val automaticModeCommand = "M:A"
+                bluetoothSocket?.outputStream?.write(automaticModeCommand.toByteArray())
+                binding.forward.isEnabled = false
+                binding.backward.isEnabled = false
+                binding.left.isEnabled = false
+                binding.right.isEnabled = false
             }
         }
 

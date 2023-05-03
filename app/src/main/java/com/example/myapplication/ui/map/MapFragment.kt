@@ -26,9 +26,6 @@ class MapFragment : Fragment() {
         val root: View = binding.root
 
         val textView: TextView = binding.textMap
-        mapViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
         return root
     }
 
