@@ -16,7 +16,7 @@
         android:contentDescription="image from the backend"
         android:padding="10dp"
         android:scaleType="fitCenter"
-        app:layout_constraintBottom_toTopOf="@+id/titleImage"
+        app:layout_constraintBottom_toTopOf="@+id/label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -29,17 +29,17 @@
         android:contentDescription="Button previous"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_left_arrow"
-        app:layout_constraintBottom_toBottomOf="@+id/titleImage"
-        app:layout_constraintEnd_toStartOf="@id/titleImage"
+        app:layout_constraintBottom_toBottomOf="@+id/label"
+        app:layout_constraintEnd_toStartOf="@id/label"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/titleImage" />
+        app:layout_constraintTop_toTopOf="@+id/label" />
 
     <TextView
-        android:id="@+id/titleImage"
+        android:id="@+id/label"
         android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="120dp"
-        android:text="Image Wtf c'est drole"
+        android:text="Loading..."
         android:textAlignment="center"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -55,9 +55,9 @@
         android:contentDescription="Button next"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_right_arrow"
-        app:layout_constraintBottom_toBottomOf="@+id/titleImage"
+        app:layout_constraintBottom_toBottomOf="@+id/label"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/titleImage"
-        app:layout_constraintTop_toTopOf="@+id/titleImage" />
+        app:layout_constraintStart_toEndOf="@+id/label"
+        app:layout_constraintTop_toTopOf="@+id/label" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

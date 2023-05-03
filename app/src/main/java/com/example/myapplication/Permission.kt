@@ -23,7 +23,7 @@ class Permission {
         Manifest.permission.BLUETOOTH_PRIVILEGED
     )
     @RequiresApi(Build.VERSION_CODES.S)
-    public fun checkPermissions(activity: Activity, context: Context) {
+    fun checkPermissions(activity: Activity, context: Context) {
         val permission1 =
             ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
         val permission2 =
