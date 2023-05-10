@@ -1,8 +1,11 @@
 package com.example.myapplication
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.*
+import android.content.ContentValues
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -10,21 +13,22 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.myapplication.databinding.ActivityMainBinding
+import com.example.myapplication.ui.remote.RemoteFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.io.IOException
 import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-
-    private var mOutStringBuffer: StringBuffer? = null
-    private var mBluetoothAdapter: BluetoothAdapter? = null
-//    private val mService: BluetoothService? = null
+    private val bluetoothService = BluetoothService().getInstance()
 
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.S)
@@ -45,29 +49,40 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        bluetoothService!!.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
+        if (ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.BLUETOOTH
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            bluetoothService.connectToDevice()
+        } else {
+            requestPermissions(
+                arrayOf(Manifest.permission.BLUETOOTH),
+                bluetoothService.BLUETOOTH_PERMISSION_REQUEST_CODE
+            )
+        }
 //        Permission().checkPermissions(this, applicationContext)
     }
 
     @SuppressLint("MissingPermission", "NewApi")
     override fun onStart() {
         super.onStart()
-        if (mBluetoothAdapter == null) {
-            return
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == bluetoothService!!.BLUETOOTH_PERMISSION_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            bluetoothService.connectToDevice()
         }
-//        if (!mBluetoothAdapter!!.isEnabled) {
-//            val enableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-//            startActivityForResult(enableIntent, 3)
-//        } else if (mService == null) {
-//            Permission().checkPermissions(this, applicationContext)
-//            mOutStringBuffer = StringBuffer()
-//        }
     }
 
     @SuppressLint("MissingPermission")
     internal fun ensureDiscoverable() {
-        if (mBluetoothAdapter!!.scanMode !=
-            BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE
-        ) {
+        if (bluetoothService!!.bluetoothAdapter.scanMode != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
             val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
             discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
             startActivityForResult(discoverableIntent, 1)
@@ -82,6 +97,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-//        mService!!.stop()
+        try {
+            bluetoothService!!.bluetoothSocket?.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 }

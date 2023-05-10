@@ -1,3 +1,5 @@
+@file:OptIn(DelicateCoroutinesApi::class)
+
 package com.example.myapplication.ui.remote
 
 import android.bluetooth.BluetoothAdapter
@@ -15,12 +17,15 @@ import java.io.IOException
 import java.io.OutputStream
 import java.util.*
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.util.Log
 import android.view.MotionEvent
 import androidx.core.content.ContextCompat
 import com.example.myapplication.APIMower
+import com.example.myapplication.BluetoothService
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 
@@ -29,51 +34,29 @@ class RemoteFragment : Fragment() {
     private var _binding: FragmentRemoteBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var bluetoothAdapter: BluetoothAdapter
-    private var bluetoothSocket: BluetoothSocket? = null
-
-    companion object {
-        private const val BLUETOOTH_PERMISSION_REQUEST_CODE = 1
-    }
-
-    private val bluetoothDeviceAddress = "E4:5F:01:92:B0:3F"
-
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val remoteViewModel =
-            ViewModelProvider(this)[RemoteViewModel::class.java]
-
         _binding = FragmentRemoteBinding.inflate(inflater, container, false)
         val root: View = binding.root
+        val bluetoothService = BluetoothService().getInstance()
 
         var automaticMode = false
-
-        if (automaticMode) {
-            binding.forward.isEnabled = false
-            binding.backward.isEnabled = false
-            binding.left.isEnabled = false
-            binding.right.isEnabled = false
-        }
-
         var sessionActive = false
         binding.findBluetooth.setOnClickListener { (activity as MainActivity).ensureDiscoverable() }
 
         binding.toggleMode.setOnClickListener {
             if (automaticMode) {
-//                val manualModeCommand = "M:M"
-//                bluetoothSocket?.outputStream?.write(manualModeCommand.toByteArray())
-                sendBluetoothCommand("M:M")
+                bluetoothService!!.sendBluetoothCommand("M:M")
                 binding.forward.isEnabled = true
                 binding.backward.isEnabled = true
                 binding.left.isEnabled = true
                 binding.right.isEnabled = true
             } else {
-//                val automaticModeCommand = "M:A"
-//                bluetoothSocket?.outputStream?.write(automaticModeCommand.toByteArray())
-                sendBluetoothCommand("M:A")
+                bluetoothService!!.sendBluetoothCommand("M:A")
                 binding.forward.isEnabled = false
                 binding.backward.isEnabled = false
                 binding.left.isEnabled = false
@@ -81,7 +64,6 @@ class RemoteFragment : Fragment() {
             }
             automaticMode = !automaticMode
         }
-
         binding.session.setOnClickListener {
             if (sessionActive) {
                 binding.session.text = "End Session"
@@ -96,124 +78,57 @@ class RemoteFragment : Fragment() {
             }
             sessionActive = !sessionActive
         }
-
         binding.forward.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    sendBluetoothCommand("D:W")
+                    bluetoothService!!.sendBluetoothCommand("D:W")
                 }
                 MotionEvent.ACTION_UP -> {
-                    sendBluetoothCommand("D:Q")
+                    bluetoothService!!.sendBluetoothCommand("D:Q")
                 }
             }
             true
         }
-
         binding.backward.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    sendBluetoothCommand("D:S")
+                    bluetoothService!!.sendBluetoothCommand("D:S")
                 }
                 MotionEvent.ACTION_UP -> {
-                    sendBluetoothCommand("D:Q")
+                    bluetoothService!!.sendBluetoothCommand("D:Q")
                 }
             }
             true
         }
-
         binding.left.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    sendBluetoothCommand("D:A")
+                    bluetoothService!!.sendBluetoothCommand("D:A")
                 }
                 MotionEvent.ACTION_UP -> {
-                    sendBluetoothCommand("D:Q")
+                    bluetoothService!!.sendBluetoothCommand("D:Q")
                 }
             }
             true
         }
-
         binding.right.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    sendBluetoothCommand("D:D")
+                    bluetoothService!!.sendBluetoothCommand("D:D")
                 }
                 MotionEvent.ACTION_UP -> {
-                    sendBluetoothCommand("D:Q")
+                    bluetoothService!!.sendBluetoothCommand("D:Q")
                 }
             }
             true
         }
 
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.BLUETOOTH
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            connectToDevice()
-        } else {
-            requestPermissions(
-                arrayOf(Manifest.permission.BLUETOOTH),
-                BLUETOOTH_PERMISSION_REQUEST_CODE
-            )
-        }
         return root
     }
-
-    private fun connectToDevice() {
-        try {
-            val device: BluetoothDevice? = bluetoothAdapter.getRemoteDevice(bluetoothDeviceAddress)
-            bluetoothSocket =
-                device?.createRfcommSocketToServiceRecord(UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ab"))
-            bluetoothSocket?.connect()
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == BLUETOOTH_PERMISSION_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            connectToDevice()
-        }
-    }
-
-    private fun sendBluetoothCommand(command: String) {
-        try {
-            // Put the mower in manual mode
-
-            // Send the desired command
-            bluetoothSocket?.outputStream?.write(command.toByteArray())
-
-            // Put the mower back in automatic mode
-
-            // Flush the output stream
-            bluetoothSocket?.outputStream?.flush()
-
-            // Print a success message
-            Log.d(TAG, "Command sent successfully: $command")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error sending command: $command", e)
-        }
-    }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        try {
-            bluetoothSocket?.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
     }
 
 }
