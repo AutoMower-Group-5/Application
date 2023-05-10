@@ -20,6 +20,9 @@ import android.content.pm.PackageManager
 import android.util.Log
 import android.view.MotionEvent
 import androidx.core.content.ContextCompat
+import com.example.myapplication.APIMower
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 
 class RemoteFragment : Fragment() {
 
@@ -46,33 +49,52 @@ class RemoteFragment : Fragment() {
         _binding = FragmentRemoteBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        if (remoteViewModel.automaticMode) {
+        var automaticMode = false
+
+        if (automaticMode) {
             binding.forward.isEnabled = false
             binding.backward.isEnabled = false
             binding.left.isEnabled = false
             binding.right.isEnabled = false
         }
 
+        var sessionActive = false
         binding.findBluetooth.setOnClickListener { (activity as MainActivity).ensureDiscoverable() }
 
         binding.toggleMode.setOnClickListener {
-            remoteViewModel.automaticMode = !remoteViewModel.automaticMode
-            if (remoteViewModel.automaticMode) {
-
-                val manualModeCommand = "M:M"
-                bluetoothSocket?.outputStream?.write(manualModeCommand.toByteArray())
+            if (automaticMode) {
+//                val manualModeCommand = "M:M"
+//                bluetoothSocket?.outputStream?.write(manualModeCommand.toByteArray())
+                sendBluetoothCommand("M:M")
                 binding.forward.isEnabled = true
                 binding.backward.isEnabled = true
                 binding.left.isEnabled = true
                 binding.right.isEnabled = true
             } else {
-                val automaticModeCommand = "M:A"
-                bluetoothSocket?.outputStream?.write(automaticModeCommand.toByteArray())
+//                val automaticModeCommand = "M:A"
+//                bluetoothSocket?.outputStream?.write(automaticModeCommand.toByteArray())
+                sendBluetoothCommand("M:A")
                 binding.forward.isEnabled = false
                 binding.backward.isEnabled = false
                 binding.left.isEnabled = false
                 binding.right.isEnabled = false
             }
+            automaticMode = !automaticMode
+        }
+
+        binding.session.setOnClickListener {
+            if (sessionActive) {
+                binding.session.text = "End Session"
+                GlobalScope.async {
+                    APIMower().startSession()
+                }
+            } else {
+                binding.session.text = "Start Session"
+                GlobalScope.async {
+                    APIMower().endSession()
+                }
+            }
+            sessionActive = !sessionActive
         }
 
         binding.forward.setOnTouchListener { v, event ->
@@ -143,7 +165,8 @@ class RemoteFragment : Fragment() {
     private fun connectToDevice() {
         try {
             val device: BluetoothDevice? = bluetoothAdapter.getRemoteDevice(bluetoothDeviceAddress)
-            bluetoothSocket = device?.createRfcommSocketToServiceRecord(UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ab"))
+            bluetoothSocket =
+                device?.createRfcommSocketToServiceRecord(UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ab"))
             bluetoothSocket?.connect()
         } catch (e: SecurityException) {
             e.printStackTrace()
@@ -151,6 +174,7 @@ class RemoteFragment : Fragment() {
             e.printStackTrace()
         }
     }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,

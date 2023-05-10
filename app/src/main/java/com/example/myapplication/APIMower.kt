@@ -33,4 +33,26 @@ class APIMower {
         }
         return result
     }
+
+    fun startSession(): ResponseBody? {
+        var result: ResponseBody? = null
+        try {
+            result = run("https://intense-stream-40056.herokuapp.com/session/startSession")
+        } catch (err: Error) {
+            print("Error when executing get request: " + err.localizedMessage)
+        }
+        return result
+    }
+
+    fun endSession(): ResponseBody? {
+        var result: ResponseBody? = null
+        try {
+            result = run("https://intense-stream-40056.herokuapp.com/session/endSession")
+        } catch (err: Error) {
+            print("Error when executing get request: " + err.localizedMessage)
+        }
+        return result
+    }
+
+
 }

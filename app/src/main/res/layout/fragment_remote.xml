@@ -7,6 +7,16 @@
     tools:context=".ui.remote.RemoteFragment">
 
     <Button
+        android:id="@+id/session"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="Start Session"
+        app:layout_constraintBottom_toTopOf="@+id/findBluetooth"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
         android:id="@+id/findBluetooth"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

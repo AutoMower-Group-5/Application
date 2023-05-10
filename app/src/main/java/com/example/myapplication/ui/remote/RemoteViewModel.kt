@@ -10,6 +10,5 @@ class RemoteViewModel : ViewModel() {
         value = "This is remote Fragment"
     }
 
-    var automaticMode = false
     val text: LiveData<String> = _text
 }
