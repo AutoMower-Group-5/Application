@@ -2,27 +2,16 @@
 
 package com.example.myapplication.ui.remote
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.example.myapplication.MainActivity
 import com.example.myapplication.databinding.FragmentRemoteBinding
-import java.io.IOException
-import java.io.OutputStream
 import java.util.*
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ContentValues.TAG
-import android.content.pm.PackageManager
-import android.util.Log
 import android.view.MotionEvent
-import androidx.core.content.ContextCompat
 import com.example.myapplication.APIMower
 import com.example.myapplication.BluetoothService
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -44,12 +33,10 @@ class RemoteFragment : Fragment() {
         val root: View = binding.root
         val bluetoothService = BluetoothService().getInstance()
 
-        var automaticMode = false
-        var sessionActive = false
         binding.findBluetooth.setOnClickListener { (activity as MainActivity).ensureDiscoverable() }
 
         binding.toggleMode.setOnClickListener {
-            if (automaticMode) {
+            if ((activity as MainActivity).automatic) {
                 bluetoothService!!.sendBluetoothCommand("M:M")
                 binding.forward.isEnabled = true
                 binding.backward.isEnabled = true
@@ -62,10 +49,10 @@ class RemoteFragment : Fragment() {
                 binding.left.isEnabled = false
                 binding.right.isEnabled = false
             }
-            automaticMode = !automaticMode
+            (activity as MainActivity).automatic = !(activity as MainActivity).automatic
         }
         binding.session.setOnClickListener {
-            if (sessionActive) {
+            if (!(activity as MainActivity).session) {
                 binding.session.text = "End Session"
                 GlobalScope.async {
                     APIMower().startSession()
@@ -76,7 +63,7 @@ class RemoteFragment : Fragment() {
                     APIMower().endSession()
                 }
             }
-            sessionActive = !sessionActive
+            (activity as MainActivity).session = !(activity as MainActivity).session
         }
         binding.forward.setOnTouchListener { v, event ->
             when (event.action) {
@@ -124,6 +111,20 @@ class RemoteFragment : Fragment() {
         }
 
         return root
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if ((activity as MainActivity).session) {
+            binding.session.text = "End Session"
+        }
+        if ((activity as MainActivity).automatic) {
+            binding.forward.isEnabled = false
+            binding.backward.isEnabled = false
+            binding.left.isEnabled = false
+            binding.right.isEnabled = false
+        }
     }
 
     override fun onDestroyView() {

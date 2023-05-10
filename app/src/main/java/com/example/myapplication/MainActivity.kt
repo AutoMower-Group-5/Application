@@ -29,6 +29,8 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val bluetoothService = BluetoothService().getInstance()
+    var session = false
+    var automatic = false
 
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.S)

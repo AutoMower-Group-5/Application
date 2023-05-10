@@ -14,6 +14,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.myapplication.APIMower
+import com.example.myapplication.MainActivity
 import com.example.myapplication.databinding.FragmentImageBinding
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -49,23 +50,31 @@ class ImageFragment : Fragment() {
         binding.nextImage.visibility = INVISIBLE
         binding.nextImage.setOnClickListener { clickNextImage() }
 
-        GlobalScope.async {
-            val result = APIMower().getArrayImages()
-            if (result != null) {
-                listImage = Json.decodeFromString<Array<DataImage>>(result.string())
-            }
-            activity!!.runOnUiThread {
-                if (listImage!!.size > 1) {
-                    binding.nextImage.visibility = VISIBLE
-                    downloadImageTest()
-                } else if (listImage!!.isEmpty()) {
-                    binding.label.text = "No image"
-                } else {
-                    downloadImageTest()
+        return root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if ((activity as MainActivity).session) {
+            GlobalScope.async {
+                val result = APIMower().getArrayImages()
+                if (result != null) {
+                    listImage = Json.decodeFromString<Array<DataImage>>(result.string())
+                }
+                activity!!.runOnUiThread {
+                    if (listImage!!.size > 1) {
+                        binding.nextImage.visibility = VISIBLE
+                        downloadImageTest()
+                    } else if (listImage!!.isEmpty()) {
+                        binding.label.text = "No image"
+                    } else {
+                        downloadImageTest()
+                    }
                 }
             }
+        } else {
+            binding.label.text = "No session started yet!"
         }
-        return root
     }
 
     override fun onDestroyView() {

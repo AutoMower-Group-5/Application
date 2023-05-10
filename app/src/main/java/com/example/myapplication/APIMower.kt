@@ -17,7 +17,8 @@ class APIMower {
     fun getArrayImages(): ResponseBody? {
         var result: ResponseBody? = null
         try {
-            result = run("https://intense-stream-40056.herokuapp.com/image/get")
+//            result = run("https://intense-stream-40056.herokuapp.com/image/get")
+            result = run("https://intense-stream-40056.herokuapp.com/image/getWithSession")
         } catch (err: Error) {
             print("Error when executing get request: " + err.localizedMessage)
         }
