@@ -1,55 +1,37 @@
-package com.example.myapplication.ui.map
-
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import com.example.myapplication.APIMower
+import com.example.myapplication.R
 import com.example.myapplication.databinding.FragmentMapBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.myapplication.ui.map.MapView
+import com.example.myapplication.ui.map.MapViewModel
 
 class MapFragment : Fragment() {
 
-    private var _binding: FragmentMapBinding? = null
-    private val binding get() = _binding!!
+        private lateinit var mapView: MapView
+        private lateinit var mapViewModel: MapViewModel
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentMapBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View {
+            val rootView = inflater.inflate(R.layout.fragment_map, container, false)
+            mapView = rootView.findViewById(R.id.MapView)
 
-        // Create an instance of the APIMower class
-        val apiMower = APIMower()
+            mapViewModel = ViewModelProvider(this).get(MapViewModel::class.java)
+            mapView.bindViewModel(mapViewModel)
 
-        // Call the getArrayPath() function using a coroutine
-        lifecycleScope.launch {
-            val response = withContext(Dispatchers.IO) {
-                apiMower.getArrayPath()
-            }
-
-            // Convert the response to a string and display it in a text view
-            response?.let {
-                val pathData = it.string()
-                val textView: TextView = binding.textMap
-                textView.text = pathData
-            }
+            return rootView
         }
 
-        return root
-    }
-
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+        override fun onDestroyView() {
+            super.onDestroyView()
+            mapView.unbindViewModel(mapViewModel)
+        }
 }
