@@ -18,9 +18,10 @@ class APIMower {
         var result: ResponseBody? = null
         try {
 //            result = run("https://intense-stream-40056.herokuapp.com/image/get")
-            result = run("https://intense-stream-40056.herokuapp.com/image/getWithSession")
+            result = run("https://intense-stream-40056.herokuapp.com/image/session/get")
+            println(result)
         } catch (err: Error) {
-            print("Error when executing get request: " + err.localizedMessage)
+            println("Error when executing get request: " + err.localizedMessage)
         }
         return result
     }
@@ -28,9 +29,9 @@ class APIMower {
     fun getArrayPath(): ResponseBody? {
         var result: ResponseBody? = null
         try {
-            result = run("https://intense-stream-40056.herokuapp.com/path/get")
+            result = run("https://intense-stream-40056.herokuapp.com/path/session/get")
         } catch (err: Error) {
-            print("Error when executing get request: " + err.localizedMessage)
+            println("Error when executing get request: " + err.localizedMessage)
         }
         return result
     }
@@ -38,9 +39,9 @@ class APIMower {
     fun startSession(): ResponseBody? {
         var result: ResponseBody? = null
         try {
-            result = run("https://intense-stream-40056.herokuapp.com/session/startSession")
+            result = run("https://intense-stream-40056.herokuapp.com/session/start")
         } catch (err: Error) {
-            print("Error when executing get request: " + err.localizedMessage)
+            println("Error when executing get request: " + err.localizedMessage)
         }
         return result
     }
@@ -48,9 +49,19 @@ class APIMower {
     fun endSession(): ResponseBody? {
         var result: ResponseBody? = null
         try {
-            result = run("https://intense-stream-40056.herokuapp.com/session/endSession")
+            result = run("https://intense-stream-40056.herokuapp.com/session/end")
         } catch (err: Error) {
-            print("Error when executing get request: " + err.localizedMessage)
+            println("Error when executing get request: " + err.localizedMessage)
+        }
+        return result
+    }
+
+    fun isSession(): ResponseBody? {
+        var result: ResponseBody? = null
+        try {
+            result = run("https://intense-stream-40056.herokuapp.com/session/check")
+        } catch (err: Error) {
+            println("Error when executing get request: " + err.localizedMessage)
         }
         return result
     }

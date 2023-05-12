@@ -22,15 +22,20 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.ui.remote.RemoteFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import java.io.IOException
 import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val bluetoothService = BluetoothService().getInstance()
+    val bluetoothService = BluetoothService().getInstance()
     var session = false
     var automatic = false
+    var connected = false
 
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.S)
@@ -51,6 +56,8 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        Permission().checkPermissions(this, applicationContext)
+
         bluetoothService!!.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
         if (ContextCompat.checkSelfPermission(
@@ -65,7 +72,11 @@ class MainActivity : AppCompatActivity() {
                 bluetoothService.BLUETOOTH_PERMISSION_REQUEST_CODE
             )
         }
-//        Permission().checkPermissions(this, applicationContext)
+
+        GlobalScope.async {
+            val result = APIMower().isSession()
+            session = result!!.string() != "false"
+        }
     }
 
     @SuppressLint("MissingPermission", "NewApi")
@@ -78,23 +89,9 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == bluetoothService!!.BLUETOOTH_PERMISSION_REQUEST_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            bluetoothService.connectToDevice()
+//            bluetoothService.connectToDevice()
+//            connected = true
         }
-    }
-
-    @SuppressLint("MissingPermission")
-    internal fun ensureDiscoverable() {
-        if (bluetoothService!!.bluetoothAdapter.scanMode != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
-            startActivityForResult(discoverableIntent, 1)
-        }
-        val requestCode = 1;
-        val discoverableIntent: Intent =
-            Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
-                putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
-            }
-        startActivityForResult(discoverableIntent, requestCode)
     }
 
     override fun onDestroy() {

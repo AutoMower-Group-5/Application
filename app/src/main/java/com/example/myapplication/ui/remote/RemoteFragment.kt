@@ -2,21 +2,21 @@
 
 package com.example.myapplication.ui.remote
 
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.myapplication.APIMower
 import com.example.myapplication.MainActivity
 import com.example.myapplication.databinding.FragmentRemoteBinding
-import java.util.*
-import android.annotation.SuppressLint
-import android.view.MotionEvent
-import com.example.myapplication.APIMower
-import com.example.myapplication.BluetoothService
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import java.util.*
 
 class RemoteFragment : Fragment() {
 
@@ -31,19 +31,42 @@ class RemoteFragment : Fragment() {
     ): View {
         _binding = FragmentRemoteBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        val bluetoothService = BluetoothService().getInstance()
 
-        binding.findBluetooth.setOnClickListener { (activity as MainActivity).ensureDiscoverable() }
+        binding.findBluetooth.setOnClickListener {
+            if ((activity as MainActivity).connected) {
+                (activity as MainActivity).bluetoothService!!.disconnectDevice()
+                (activity as MainActivity).connected = false
+                binding.findBluetooth.text = "Connect"
+                binding.toggleMode.isEnabled = false
+                binding.forward.isEnabled = false
+                binding.backward.isEnabled = false
+                binding.left.isEnabled = false
+                binding.right.isEnabled = false
+            } else {
+                (activity as MainActivity).bluetoothService!!.connectToDevice()
+                if ((activity as MainActivity).bluetoothService!!.bluetoothSocket!!.isConnected) {
+                    (activity as MainActivity).connected = true
+                    binding.findBluetooth.text = "Disconnect"
+                    binding.toggleMode.isEnabled = true
+                    if (!(activity as MainActivity).automatic) {
+                        binding.forward.isEnabled = true
+                        binding.backward.isEnabled = true
+                        binding.left.isEnabled = true
+                        binding.right.isEnabled = true
+                    }
+                }
+            }
+        }
 
         binding.toggleMode.setOnClickListener {
             if ((activity as MainActivity).automatic) {
-                bluetoothService!!.sendBluetoothCommand("M:M")
+                (activity as MainActivity).bluetoothService!!.sendBluetoothCommand("M:M")
                 binding.forward.isEnabled = true
                 binding.backward.isEnabled = true
                 binding.left.isEnabled = true
                 binding.right.isEnabled = true
             } else {
-                bluetoothService!!.sendBluetoothCommand("M:A")
+                (activity as MainActivity).bluetoothService!!.sendBluetoothCommand("M:A")
                 binding.forward.isEnabled = false
                 binding.backward.isEnabled = false
                 binding.left.isEnabled = false
@@ -68,10 +91,10 @@ class RemoteFragment : Fragment() {
         binding.forward.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    bluetoothService!!.sendBluetoothCommand("D:W")
+                    (activity as MainActivity).bluetoothService!!.sendBluetoothCommand("D:W")
                 }
                 MotionEvent.ACTION_UP -> {
-                    bluetoothService!!.sendBluetoothCommand("D:Q")
+                    (activity as MainActivity).bluetoothService!!.sendBluetoothCommand("D:Q")
                 }
             }
             true
@@ -79,10 +102,10 @@ class RemoteFragment : Fragment() {
         binding.backward.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    bluetoothService!!.sendBluetoothCommand("D:S")
+                    (activity as MainActivity).bluetoothService!!.sendBluetoothCommand("D:S")
                 }
                 MotionEvent.ACTION_UP -> {
-                    bluetoothService!!.sendBluetoothCommand("D:Q")
+                    (activity as MainActivity).bluetoothService!!.sendBluetoothCommand("D:Q")
                 }
             }
             true
@@ -90,10 +113,10 @@ class RemoteFragment : Fragment() {
         binding.left.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    bluetoothService!!.sendBluetoothCommand("D:A")
+                    (activity as MainActivity).bluetoothService!!.sendBluetoothCommand("D:A")
                 }
                 MotionEvent.ACTION_UP -> {
-                    bluetoothService!!.sendBluetoothCommand("D:Q")
+                    (activity as MainActivity).bluetoothService!!.sendBluetoothCommand("D:Q")
                 }
             }
             true
@@ -101,25 +124,31 @@ class RemoteFragment : Fragment() {
         binding.right.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    bluetoothService!!.sendBluetoothCommand("D:D")
+                    (activity as MainActivity).bluetoothService!!.sendBluetoothCommand("D:D")
                 }
                 MotionEvent.ACTION_UP -> {
-                    bluetoothService!!.sendBluetoothCommand("D:Q")
+                    (activity as MainActivity).bluetoothService!!.sendBluetoothCommand("D:Q")
                 }
             }
             true
         }
-
         return root
     }
 
     override fun onResume() {
         super.onResume()
 
+        if (!(activity as MainActivity).connected) {
+            binding.findBluetooth.text = "Connect"
+            binding.toggleMode.isEnabled = false
+        } else {
+            binding.findBluetooth.text = "Disconnect"
+        }
         if ((activity as MainActivity).session) {
             binding.session.text = "End Session"
         }
-        if ((activity as MainActivity).automatic) {
+        if ((activity as MainActivity).automatic || !(activity as MainActivity).connected) {
+            println("burh ?")
             binding.forward.isEnabled = false
             binding.backward.isEnabled = false
             binding.left.isEnabled = false

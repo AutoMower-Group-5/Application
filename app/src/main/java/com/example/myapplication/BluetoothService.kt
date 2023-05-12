@@ -30,7 +30,16 @@ class BluetoothService {
         return INSTANCE
     }
 
+    fun disconnectDevice() {
+        try {
+            bluetoothSocket?.close()
+        } catch (e: Exception) {
+        }
+        bluetoothSocket = null
+    }
+
     fun connectToDevice() {
+        println("----------------------")
         try {
             val device: BluetoothDevice? = bluetoothAdapter.getRemoteDevice(bluetoothDeviceAddress)
             bluetoothSocket =
@@ -41,8 +50,11 @@ class BluetoothService {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        println("----------------------")
     }
+
     fun sendBluetoothCommand(command: String) {
+        println("Send: $command ?")
         try {
             bluetoothSocket?.outputStream?.write(command.toByteArray())
             bluetoothSocket?.outputStream?.flush()

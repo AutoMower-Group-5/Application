@@ -35,10 +35,9 @@ class ImageFragment : Fragment() {
     private var numberImage = 0
 
     @Serializable
-    data class DataImage(val Label: String, val URL: String)
+    data class DataImage(val Url: String, val Label: String,)
 
     @SuppressLint("SetTextI18n")
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -58,6 +57,7 @@ class ImageFragment : Fragment() {
         if ((activity as MainActivity).session) {
             GlobalScope.async {
                 val result = APIMower().getArrayImages()
+
                 if (result != null) {
                     listImage = Json.decodeFromString<Array<DataImage>>(result.string())
                 }
@@ -106,7 +106,7 @@ class ImageFragment : Fragment() {
         var error = false
 
         executor.execute {
-            val imageURL = listImage?.get(numberImage)!!.URL
+            val imageURL = listImage?.get(numberImage)!!.Url
 
             var image: Bitmap? = null
             try {
