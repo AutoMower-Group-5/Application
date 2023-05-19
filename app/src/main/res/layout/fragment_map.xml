@@ -21,16 +21,10 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <com.example.myapplication.ui.map.MowerMapView
-        android:id="@+id/MowerMapView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <com.example.myapplication.ui.map.MapView
         android:id="@+id/MapView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.map
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,7 +16,8 @@ class MapViewModel : ViewModel() {
         viewModelScope.launch {
             val pathData = apiMower.getArrayPath()
             if (pathData != null) {
-                val floatArray = pathData.flatMap { listOf(it.first, it.second) }.toFloatArray()
+                // If the pathData is a list of Pair<Double, Double>
+                val floatArray = pathData.flatMap { listOf(it.first.toFloat(), it.second.toFloat()) }.toFloatArray()
                 setPositionData(floatArray)
             }
         }
@@ -29,3 +31,5 @@ class MapViewModel : ViewModel() {
         positionsLiveData.value = positionData
     }
 }
+
+

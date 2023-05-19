@@ -40,8 +40,10 @@ class APIMower {
 
             val pathData = mutableListOf<Pair<Float, Float>>()
             for (i in 0 until jsonArray.length()) {
-                val coordArray = jsonArray.getJSONArray(i)
-                pathData.add(Pair(coordArray.getDouble(0).toFloat(), coordArray.getDouble(1).toFloat()))
+                val coordObject = jsonArray.getJSONObject(i)
+                val x = coordObject.getDouble("x").toFloat()
+                val y = coordObject.getDouble("y").toFloat()
+                pathData.add(Pair(x, y))
             }
 
             pathData
@@ -50,6 +52,7 @@ class APIMower {
             null
         }
     }
+
 
 
     fun startSession(): ResponseBody? {
