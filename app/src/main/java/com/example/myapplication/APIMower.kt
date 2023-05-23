@@ -32,28 +32,27 @@ class APIMower {
         return result
     }
 
-    suspend fun getArrayPath(): List<Pair<Float, Float>>? = withContext(Dispatchers.IO) {
+    fun getArrayPath(): ResponseBody? {
+        var result: ResponseBody? = null
+
         try {
-            val responseBody = run("https://intense-stream-40056.herokuapp.com/path/session/get")
-            val jsonData = responseBody?.string()
-            val jsonArray = JSONArray(jsonData)
-
-            val pathData = mutableListOf<Pair<Float, Float>>()
-            for (i in 0 until jsonArray.length()) {
-                val coordObject = jsonArray.getJSONObject(i)
-                val x = coordObject.getDouble("x").toFloat()
-                val y = coordObject.getDouble("y").toFloat()
-                pathData.add(Pair(x, y))
-            }
-
-            pathData
-        } catch (err: Throwable) {
+            result = run("https://intense-stream-40056.herokuapp.com/path/get")
+//            val jsonData = responseBody?.string()
+//            val jsonArray = JSONArray(jsonData)
+//
+//            val pathData = mutableListOf<Pair<Float, Float>>()
+//            for (i in 0 until jsonArray.length()) {
+//                val coordObject = jsonArray.getJSONObject(i)
+//                val x = coordObject.getDouble("x").toFloat()
+//                val y = coordObject.getDouble("y").toFloat()
+//                pathData.add(Pair(x, y))
+//            }
+//            pathData
+        } catch (err: Error) {
             println("Error when executing get request: " + err.localizedMessage)
-            null
         }
+        return result
     }
-
-
 
     fun startSession(): ResponseBody? {
         var result: ResponseBody? = null
