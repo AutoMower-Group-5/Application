@@ -53,24 +53,35 @@ class MapView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         positions?.let {
-            val scaleFactor = 100 // adjust this value according to your needs
+            if (it.size < 4) return // Need at least two points to draw a line
+
+            // Find the minimum and maximum values for x and y coordinates
+            val minX = it.minOrNull() ?: 0f
+            val minY = it.minOrNull() ?: 0f
+            val maxX = it.maxOrNull() ?: 0f
+            val maxY = it.maxOrNull() ?: 0f
+
+            // Calculate the scale factor based on the maximum difference between min and max values
+            val diffX = maxX - minX
+            val diffY = maxY - minY
+            val scaleFactor = kotlin.math.min(width.toFloat() / diffX, height.toFloat() / diffY)
 
             canvas.save()
 
             canvas.scale(1f, -1f, width / 2f, height / 2f)
 
             for (i in 0 until it.size - 2 step 2) {
-                val startX = it[i] * scaleFactor
-                val startY = it[i + 1] * scaleFactor
-                val stopX = it[i + 2] * scaleFactor
-                val stopY = it[i + 3] * scaleFactor
+                val startX = (it[i] - minX) * scaleFactor
+                val startY = (it[i + 1] - minY) * scaleFactor
+                val stopX = (it[i + 2] - minX) * scaleFactor
+                val stopY = (it[i + 3] - minY) * scaleFactor
                 Log.d("MapView", "Drawing line from ($startX, $startY) to ($stopX, $stopY)")
                 canvas.drawLine(startX, startY, stopX, stopY, paint)
             }
 
             // Draw an arrow at the last position.
-            val lastX = it[it.size - 2] * scaleFactor
-            val lastY = it[it.size - 1] * scaleFactor
+            val lastX = (it[it.size - 2] - minX) * scaleFactor
+            val lastY = (it[it.size - 1] - minY) * scaleFactor
             arrowPath.reset()
             arrowPath.moveTo(lastX, lastY - 10) // 10 is the half size of the arrow, adjust as needed
             arrowPath.lineTo(lastX - 10, lastY + 10)

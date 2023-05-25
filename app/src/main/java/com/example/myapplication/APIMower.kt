@@ -36,7 +36,7 @@ class APIMower {
         var result: ResponseBody? = null
 
         try {
-            result = run("https://intense-stream-40056.herokuapp.com/path/get")
+            result = run("https://intense-stream-40056.herokuapp.com/path/session/get")
 //            val jsonData = responseBody?.string()
 //            val jsonArray = JSONArray(jsonData)
 //

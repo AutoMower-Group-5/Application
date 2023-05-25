@@ -37,7 +37,9 @@ class MapViewModel : ViewModel() {
 
             // If the pathData is a list of Pair<Double, Double>
             val floatArray = pathData.flatMap { listOf(it.first, it.second) }.toFloatArray()
-            activity.runOnUiThread{setPositionData(floatArray)}
+            activity.runOnUiThread{setPositionData(floatArray)
+            println("test,i'm in")
+            }
         }
     }
     fun getPositionsLiveData(): LiveData<FloatArray> {

@@ -21,11 +21,6 @@ class MowerMapView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
-    fun setMowerPositions(positions: List<Pair<Float, Float>>) {
-        this.mowerPositions = positions
-        invalidate()
-    }
-
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
