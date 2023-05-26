@@ -2,6 +2,7 @@ package com.example.myapplication.ui.map
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
@@ -33,22 +34,32 @@ class MapView @JvmOverloads constructor(
 
     // Initialize the path for the arrow
     private val arrowPath = Path()
-
+    private var collisionPoint: Pair<Float, Float>? = null
     private var positions: FloatArray? = null
+    private var collisionPoints: List<Pair<Float, Float>>? = null
 
-    private val observer = Observer<FloatArray> { positions ->
+    private val positionsObserver = Observer<FloatArray> { positions ->
         Log.d("MapView", "Setting positions: ${positions.joinToString()}")
         this.positions = positions
         invalidate()
     }
 
+    private val collisionPointObserver = Observer<List<Pair<Float, Float>>> { collisionPoints ->
+        Log.d("MapView", "Setting collision points: ${collisionPoints.joinToString { "(${it.first}, ${it.second})" }}")
+        this.collisionPoints = collisionPoints
+        invalidate()
+    }
+
     fun bindViewModel(viewModel: MapViewModel) {
-        viewModel.getPositionsLiveData().observeForever(observer)
+        viewModel.getPositionsLiveData().observeForever(positionsObserver)
+        viewModel.getCollisionPointsLiveData().observeForever(collisionPointObserver)
     }
 
     fun unbindViewModel(viewModel: MapViewModel) {
-        viewModel.getPositionsLiveData().removeObserver(observer)
+        viewModel.getPositionsLiveData().removeObserver(positionsObserver)
+        viewModel.getCollisionPointsLiveData().removeObserver(collisionPointObserver)
     }
+
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -87,9 +98,31 @@ class MapView @JvmOverloads constructor(
             arrowPath.lineTo(lastX - 10, lastY + 10)
             arrowPath.lineTo(lastX + 10, lastY + 10)
             arrowPath.close()
+
+            val arrowPaint = Paint().apply {
+                color = Color.GREEN
+                style = Paint.Style.FILL
+                isAntiAlias = true
+            }
+
             canvas.drawPath(arrowPath, arrowPaint)
+
+            // Draw collision points
+            collisionPoints?.forEach { point ->
+                val collisionX = (point.first - minX) * scaleFactor
+                val collisionY = (point.second - minY) * scaleFactor
+
+                val dotPaint = Paint().apply {
+                    color = Color.YELLOW
+                    style = Paint.Style.FILL
+                    isAntiAlias = true
+                }
+
+                canvas.drawCircle(collisionX, collisionY, 5f, dotPaint)
+            }
 
             canvas.restore()
         }
     }
+
 }
